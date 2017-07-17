@@ -1,9 +1,11 @@
 package com.recnation.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +32,7 @@ public class MainController {
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET, value = "/")
-	public List<Event> closestEvents(@RequestParam Double latitude, @RequestParam Double longitude, @RequestParam String type, @RequestParam int maxDistance) {
+	public List<Event> getEvents(@RequestParam Double latitude, @RequestParam Double longitude, @RequestParam String type, @RequestParam int maxDistance) {
 		ArrayList<Event> events =  new ArrayList<>();		
 		MongoCollection<Document> coll = db.getCollection(type); //TODO - Add 'all' feature which returns every event
 		
@@ -48,6 +50,21 @@ public class MainController {
 		}
 		
 		return events;
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/")
+	public void postEvents(@RequestBody Event event) {
+		
+		//TODO -- Append distanceCalculation here
+		
+		MongoCollection<Document> coll = db.getCollection(event.getType());
+		coll.insertOne(new Document("type", event.getType())
+				.append("location", new Document(
+						"coordinates", Arrays.asList(event.getLongitude(), event.getLatitude()))
+						.append("type", "Point")
+				.append("special", true))				
+				);
+				
 	}
 	
 	
